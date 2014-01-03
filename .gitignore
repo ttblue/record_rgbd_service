@@ -1,0 +1,32 @@
+# Compiled Object files
+*.slo
+*.lo
+*.o
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+
+*Cache*
+*srv_gen*
+*make_install*
+
+*.project
+*.cproject
+*pyc
+*bin/*
+*CMakeFiles/*
+*MakeFile*
+*.png
+*.xml
+*.swp
+
+*build
+
+*~*
+
