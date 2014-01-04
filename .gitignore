@@ -23,7 +23,7 @@
 *CMakeFiles/*
 *MakeFile*
 *.png
-*.xml
+
 *.swp
 
 *build

@@ -1,0 +1,19 @@
+<package>
+  <description brief="record_rgbd_service">
+
+     record_rgbd_service
+
+  </description>
+  <author>Sibi Venkatesan</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/record_rgbd_service</url>
+
+  <rosdep name="libgstreamer0.10-dev"/>
+  <rosdep name="libgstreamer-plugins-base0.10-dev"/>
+  <depend package="roscpp" />
+  <depend package="rospy" />
+  <depend package="image_transport" />
+</package>
+
+
