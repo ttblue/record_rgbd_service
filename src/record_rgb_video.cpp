@@ -143,19 +143,29 @@ int main(int argc, char** argv) {
 
     if(!gst_bin_add(GST_BIN(pipeline), sink)) {
       fprintf(stderr, "gst_bin_add() failed\n"); // TODO: do some unref
+
+      gst_element_set_state(outelement, GST_STATE_NULL);
       gst_object_unref(outelement);
+
+      gst_element_set_state(pipeline, GST_STATE_NULL);
       gst_object_unref(pipeline);
       return -1;
     }
 
     if(!gst_element_link(outelement, sink)) {
       fprintf(stderr, "GStreamer: cannot link outelement(\"%s\") -> sink\n", gst_element_get_name(outelement));
+
+      gst_element_set_state(outelement, GST_STATE_NULL);
       gst_object_unref(outelement);
+
+      gst_element_set_state(pipeline, GST_STATE_NULL);
       gst_object_unref(pipeline);
       return -1;
     }
 
+    gst_element_set_state(outelement, GST_STATE_NULL);
     gst_object_unref(outelement);
+
   } else {
     GstElement* launchpipe = pipeline;
     pipeline = gst_pipeline_new(NULL);
@@ -167,6 +177,8 @@ int main(int argc, char** argv) {
 
     if(!gst_element_link(launchpipe, sink)) {
       ROS_FATAL("GStreamer: cannot link launchpipe -> sink");
+
+      gst_element_set_state(pipeline, GST_STATE_NULL);
       gst_object_unref(pipeline);
       return -1;
    }
@@ -207,25 +219,27 @@ int main(int argc, char** argv) {
 
   ros::ServiceServer saveService =
     nh_pub.advertiseService ("saveImages"+camera_name, imageSaveCallback);
-
-
+ 
   cout << "Ready..." << endl;
 
   //processVideo
   gst_element_set_state(pipeline, GST_STATE_PLAYING);
+
+
   while(nh.ok()) {
+
+    // This should block until a new frame is awake, this way, we'll run at the 
+    // actual capture framerate of the device.
+    GstBuffer* buf = gst_app_sink_pull_buffer(GST_APP_SINK(sink));
+    if (!buf) break;
+
+    GstPad* pad = gst_element_get_static_pad(sink, "sink");
+    const GstCaps *caps = gst_pad_get_negotiated_caps(pad);
+    GstStructure *structure = gst_caps_get_structure(caps,0);
+    gst_structure_get_int(structure,"width",&width);
+    gst_structure_get_int(structure,"height",&height);
+
     if (saving) {
-      // This should block until a new frame is awake, this way, we'll run at the 
-      // actual capture framerate of the device.
-      GstBuffer* buf = gst_app_sink_pull_buffer(GST_APP_SINK(sink));
-      if (!buf) break;
-
-      GstPad* pad = gst_element_get_static_pad(sink, "sink");
-      const GstCaps *caps = gst_pad_get_negotiated_caps(pad);
-      GstStructure *structure = gst_caps_get_structure(caps,0);
-      gst_structure_get_int(structure,"width",&width);
-      gst_structure_get_int(structure,"height",&height);
-
       cv::Mat cv_img (height, width, CV_8UC3, const_cast<uchar*>(buf->data), width*3);
       cv::cvtColor(cv_img, cv_img, CV_BGR2RGB);
     
@@ -236,14 +250,13 @@ int main(int argc, char** argv) {
       else printf("saved rgb image %i.\n", save_counter);
 
       save_counter ++;
-
       if (display) {
 	cv::imshow("Hello", cv_img);
 	cv::waitKey(1);
       }
-
-      gst_buffer_unref(buf);
     }
+
+    gst_buffer_unref(buf);
     ros::spinOnce();
 
   }
