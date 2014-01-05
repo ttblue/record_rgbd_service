@@ -82,7 +82,7 @@ void callback (const boost::shared_ptr<openni_wrapper::Image>& rgb, const boost:
 
       depth->fillDepthImageRaw(640, 480, (unsigned short*) depth_mat.data);
 
-      bool success1 = cv::imwrite( folder_name + (boost::format("/depth%05d.jpg")%save_counter).str(), depth_mat);
+      bool success1 = cv::imwrite( folder_name + (boost::format("/depth%05d.png")%save_counter).str(), depth_mat);
       bool success2 = cv::imwrite( folder_name + (boost::format("/rgb%05d.jpg")%save_counter).str(), rgb_mat);
       if (!success1 || !success2) throw std::runtime_error("Failed to write image.");
       if (verbose) printf("Saved rgb/depth images %i.\n", save_counter);
