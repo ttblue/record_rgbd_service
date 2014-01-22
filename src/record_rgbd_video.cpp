@@ -213,7 +213,7 @@ void callback (const boost::shared_ptr<openni_wrapper::Image>& rgb, const boost:
 
     pcl::toPCLPointCloud2(*pc, pcl_pc);
     pcl_conversions::fromPCL(pcl_pc, sm_pc);
-    sm_pc.header.frame_id=camera_name+"_depth_optical_frame";
+    sm_pc.header.frame_id=camera_name+"_rgb_optical_frame";
     pub.publish(sm_pc);
   }
     
