@@ -1,3 +1,4 @@
 bool start
+bool publish
 string folder_name
 ----
