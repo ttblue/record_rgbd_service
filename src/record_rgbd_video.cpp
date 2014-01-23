@@ -150,9 +150,20 @@ bool imageSaveCallback(record_rgbd_service::SaveImage::Request &req,
     cout<<"Publishing pointclouds." <<endl;
     publishing = true;
   } else {
+    cout<<"Stop publishing pointclouds." <<endl;
     publishing = false;
     // Publish empty cloud to clear the screen
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr pc(new pcl::PointCloud<pcl::PointXYZRGB>);
+    pc->points.clear();
+    pc->points.push_back(pcl::PointXYZRGB());
+    pcl::PCLPointCloud2 pcl_pc;
     sensor_msgs::PointCloud2 sm_pc;
+
+    pcl::toPCLPointCloud2(*pc, pcl_pc);
+    pcl_conversions::fromPCL(pcl_pc, sm_pc);
+    sm_pc.header.frame_id=camera_name+"_rgb_optical_frame";
+    pub.publish(sm_pc);
+
     pub.publish(sm_pc);
   }
 
@@ -252,7 +263,7 @@ int main(int argc, char** argv) {
   ros::ServiceServer saveService =
     nh_pub.advertiseService ("saveImages"+camera_name, imageSaveCallback);
 
-  std::string topic_name = std::string("PointCloud_")+camera_name;
+  std::string topic_name = std::string("point_cloud")+camera_name[6];
   pub = nh_pub.advertise<sensor_msgs::PointCloud2>(topic_name, 1);
     
   cout<<"Spawned service and depth sensor." <<endl;
