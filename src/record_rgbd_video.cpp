@@ -149,8 +149,12 @@ bool imageSaveCallback(record_rgbd_service::SaveImage::Request &req,
   if (req.publish) {
     cout<<"Publishing pointclouds." <<endl;
     publishing = true;
+  } else {
+    publishing = false;
+    // Publish empty cloud to clear the screen
+    sensor_msgs::PointCloud2 sm_pc;
+    pub.publish(sm_pc);
   }
-  else publishing = false;
 
   if (!req.start and saving) {
     saving = false;
